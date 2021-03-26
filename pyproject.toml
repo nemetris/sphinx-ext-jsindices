@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "sphinx-ext-jsindices"
+version = "0.1.0"
+description = ""
+authors = ["Marius Schenzle <marius.schenzle@nemetris.com>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/nemetris/sphinx-ext-jsindices"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+Sphinx = "^3.5.3"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.2"
+tox = "^3.23.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
