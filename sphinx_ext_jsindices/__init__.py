@@ -4,7 +4,25 @@ from typing import Any, Dict, Iterator, List, Tuple
 from sphinx.domains import Index, IndexEntry
 from sphinx.domains.javascript import JavaScriptDomain
 
-class JavaScriptModuleIndex(Index):
+from sphinx.locale import __
+from sphinx.util import logging
+from sphinx.util.console import bold
+
+logger = logging.getLogger(__name__)
+prefix = bold(__('Sphinx-ext-jsindices: '))
+
+class JavaScriptBaseIndex(Index):
+
+    @classmethod
+    def configure(cls, config):
+        options = config.jsindices_options
+        msg = "configure indices"
+        logger.info(prefix + msg)
+
+        # get options and set defaults
+        cls.use_short_names = options.get("short_names", False)
+
+class JavaScriptModuleIndex(JavaScriptBaseIndex):
     """A custom index that creates a JavaScript module matrix."""
 
     name = "modindex"
@@ -12,6 +30,9 @@ class JavaScriptModuleIndex(Index):
     shortname = "JS Modindex"
 
     def generate(self, docnames=None):
+        msg = "generate module index"
+        logger.info(prefix + msg)
+
         content = defaultdict(list)
 
         modules = {name: (dispname, typ, docname, anchor)
@@ -26,7 +47,7 @@ class JavaScriptModuleIndex(Index):
         return content, True
 
 
-class JavaScriptClassIndex(Index):
+class JavaScriptClassIndex(JavaScriptBaseIndex):
     """A custom index that creates a JavaScript class matrix."""
 
     name = "classindex"
@@ -34,6 +55,9 @@ class JavaScriptClassIndex(Index):
     shortname = "JS Classindex"
 
     def generate(self, docnames=None):
+        msg = "generate class index"
+        logger.info(prefix + msg)
+
         content = defaultdict(list)
 
         modules = {name: (dispname, typ, docname, anchor)
@@ -48,7 +72,7 @@ class JavaScriptClassIndex(Index):
         return content, True
 
 
-class JavaScriptObjectIndex(Index):
+class JavaScriptObjectIndex(JavaScriptBaseIndex):
     """A custom index that creates a JavaScript module, class and namespace matrix (nested)."""
 
     name = "index"
@@ -56,6 +80,9 @@ class JavaScriptObjectIndex(Index):
     shortname = "JS index"
 
     def generate(self, docnames=None):
+        msg = "generate object"
+        logger.info(prefix + msg)
+
         content = defaultdict(list)
 
         object_filter = ["class", "namespace", "module"]
@@ -80,6 +107,8 @@ class JavaScriptObjectIndex(Index):
                     # object without parent in list, add dummy entry
                     entries.append(IndexEntry(dispname, subtype, '', '', '', '', ''))
                 subtype = 2
+                if self.use_short_names:
+                    dispname = dispname.split(".")[-1]
             else:
                 num_toplevels += 1
                 subtype = 1
@@ -96,11 +125,18 @@ class JavaScriptObjectIndex(Index):
         sorted_content = sorted(content.items())
         return sorted_content, collapse
 
+def configure_indices(app, config):
+    JavaScriptBaseIndex.configure(config)
+
 
 def setup(app) -> Dict[str, Any]:
+    app.add_config_value('jsindices_options', {}, 'env')
+
     app.add_index_to_domain("js", JavaScriptObjectIndex)
     app.add_index_to_domain("js", JavaScriptModuleIndex)
     app.add_index_to_domain("js", JavaScriptClassIndex)
+
+    app.connect("config-inited", configure_indices)
 
     return {
         'version': '0.1',
