@@ -11,6 +11,15 @@ from sphinx.util.console import bold
 logger = logging.getLogger(__name__)
 prefix = bold(__('Sphinx-ext-jsindices: '))
 
+# IndexEntry = NamedTuple('IndexEntry', [('name', str),
+#                                        ('subtype', int),
+#                                        ('docname', str),
+#                                        ('anchor', str),
+#                                        ('extra', str),
+#                                        ('qualifier', str),
+#                                        ('descr', str)])
+
+
 class JavaScriptBaseIndex(Index):
 
     @classmethod
@@ -21,6 +30,7 @@ class JavaScriptBaseIndex(Index):
 
         # get options and set defaults
         cls.use_short_names = options.get("short_names", False)
+        cls.collapse = options.get("collapse", False)
 
 class JavaScriptModuleIndex(JavaScriptBaseIndex):
     """A custom index that creates a JavaScript module matrix."""
@@ -39,12 +49,13 @@ class JavaScriptModuleIndex(JavaScriptBaseIndex):
                    for name, dispname, typ, docname, anchor, _
                    in self.domain.get_objects() if typ == "module"}
 
-        for dispname, typ, docname, anchor in modules.values():
+        for module in sorted(modules):
+            dispname, typ, docname, anchor = modules[module]
             content[dispname[0].upper()].append(
                 (dispname, 0, docname, anchor, docname, '', typ))
 
         content = sorted(content.items())
-        return content, True
+        return content, self.collapse
 
 
 class JavaScriptClassIndex(JavaScriptBaseIndex):
@@ -60,16 +71,17 @@ class JavaScriptClassIndex(JavaScriptBaseIndex):
 
         content = defaultdict(list)
 
-        modules = {name: (dispname, typ, docname, anchor)
+        classes = {name: (dispname, typ, docname, anchor)
                    for name, dispname, typ, docname, anchor, _
                    in self.domain.get_objects() if typ == "class"}
 
-        for dispname, typ, docname, anchor in modules.values():
+        for _class in sorted(classes):
+            dispname, typ, docname, anchor = classes[_class]
             content[dispname[0].upper()].append(
                 (dispname, 0, docname, anchor, docname, '', typ))
 
         content = sorted(content.items())
-        return content, True
+        return content, self.collapse
 
 
 class JavaScriptObjectIndex(JavaScriptBaseIndex):
@@ -92,7 +104,8 @@ class JavaScriptObjectIndex(JavaScriptBaseIndex):
 
         prev_modname = ""
         num_toplevels = 0
-        for dispname, typ, docname, anchor in objects.values():
+        for module in sorted(objects):
+            dispname, typ, docname, anchor = objects[module]
             subtype = 0
             modname = dispname.split(".")[0]
             entries = content.setdefault(modname[0].lower(), [])
@@ -116,14 +129,15 @@ class JavaScriptObjectIndex(JavaScriptBaseIndex):
             entries.append(IndexEntry(dispname, subtype, docname, anchor,docname, '', typ))
             prev_modname = modname
 
-        # apply heuristics when to collapse modindex at page load:
+        # apply heuristics when to collapse index at page load:
         # only collapse if number of toplevel modules is larger than
         # number of objects (same logic in python domain)
-        collapse = len(objects) - num_toplevels < num_toplevels
+        # update: customize behaviour with collapse option
+        # collapse = len(objects) - num_toplevels < num_toplevels
 
         # sort by first letter
         sorted_content = sorted(content.items())
-        return sorted_content, collapse
+        return sorted_content, self.collapse
 
 def configure_indices(app, config):
     JavaScriptBaseIndex.configure(config)

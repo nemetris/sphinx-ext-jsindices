@@ -33,7 +33,8 @@ extensions = [
 
 # default options
 jsindices_options = {
-    "short_names": False
+    "short_names": True,
+    "collapse": True,
 }
 
 # Add any paths that contain templates here, relative to this directory.
