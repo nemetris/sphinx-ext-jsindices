@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Sphinx-Build (sphinx-ext-indices)",
+            "name": "Build Indices Docs",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/docs/make.py",

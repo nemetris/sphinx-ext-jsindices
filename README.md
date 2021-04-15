@@ -31,3 +31,20 @@ Indices And Tables
 * :ref:`JavaScript Module Index <js-modindex>`
 * :ref:`JavaScript Class and Namespace Index <js-classindex>`
 ```
+
+# Options
+
+Define a dictionary called ```jsindices_options``` to adjust the default options
+
+```python
+# default options
+jsindices_options = {
+    "short_names": False,
+    "collapse": None,
+}
+```
+
+| **Option**  | Values                                                                                                 |      Description      |
+|:------------|:-------------------------------------------------------------------------------------------------------|:---------------------:|
+| short_names | Removes all prefixes and just displays the short name of a class, function or whatever                 |   ```True/False```    |
+| collapse    | Always collapse all entries on page load if set to ```True```. Default is ```None``` (python index behaviour). | ```True/False/None``` |
