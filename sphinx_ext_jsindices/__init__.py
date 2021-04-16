@@ -92,7 +92,7 @@ class JavaScriptModuleIndex(JavaScriptBaseIndex):
     shortname = "JS Modindex"
 
     def generate(self, docnames=None):
-        msg = "generate module index"
+        msg = f"generate {self.localname}"
         logger.info(prefix + msg)
 
         content = defaultdict(list)
@@ -118,7 +118,7 @@ class JavaScriptClassIndex(JavaScriptBaseIndex):
     shortname = "JS Classindex"
 
     def generate(self, docnames=None):
-        msg = "generate class index"
+        msg = f"generate {self.localname}"
         logger.info(prefix + msg)
 
         content = defaultdict(list)
@@ -144,7 +144,7 @@ class JavaScriptObjectIndex(JavaScriptBaseIndex):
     shortname = "JS index"
 
     def generate(self, docnames=None):
-        msg = "generate object"
+        msg = f"generate {self.localname}"
         logger.info(prefix + msg)
 
         content = defaultdict(list)
@@ -206,7 +206,7 @@ def setup(app) -> Dict[str, Any]:
     app.connect("config-inited", configure_indices)
 
     return {
-        'version': '0.1',
+        'version': '0.1.0',
         'parallel_read_safe': True,
         'parallel_write_safe': True,
     }
